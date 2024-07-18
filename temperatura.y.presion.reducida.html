@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="icon.ico">
+<title>Calculadora temperatura y presión reducida</title>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-top: 50px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        label {
+            font-size: 1.2em;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        select, input[type="number"], input[type="text"] {
+            padding: 10px;
+            font-size: 1em;
+            width: calc(50% - 20px);
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: inline-block;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input[type="number"]:focus, input[type="text"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        select {
+            margin-right: 10px;
+        }
+
+        input[type="number"], input[type="text"] {
+            margin-right: 10px;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            text-align: center;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .button:active {
+            background-color: #3e8e41;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            transform: translateY(2px);
+        }
+
+        #result {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        #equation {
+            font-size: 1.5em;
+            text-align: center;
+            margin-top: 30px;
+            margin: 50px auto;
+            max-width: 600px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            max-width: 100px;
+            max-height: 100px;
+            margin: 50px auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        img:hover {
+            background-color: #4CAF50;
+            color: #ffffff;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!--By tete12345677. Follow me on github-->
+<h1>Calculadora temperatura y presión reducida</h1>
+<form>
+    <label for="gas">Selecciona un gas</label>
+    <select name="gases" id="gases">
+        <option value=""></option>
+        <option value="Custom">Custom</option>
+    </select>
+    <br><br>
+    <input type="number" id="pC" placeholder="Presión crítica" min="0" disabled required>
+    <select id="pC-unit" name="pC-unit" disabled>
+        <option value="MPa">Mega Pascal</option>
+        <option value="Bar">Bar</option>
+        <option value="Atm" selected>Atmósfera</option>
+        <option value="mmHg">Milímetro de mercurio</option>
+    </select>
+    <br>
+    <input type="number" id="tC" placeholder="Temperatura crítica" disabled required>
+    <select id="tC-unit" name="tC-unit" disabled>
+        <option value="K">Kelvin</option>
+        <option value="C" selected>Grado Celsius</option>
+        <option value="F">Grado Fahrenheit</option>
+        <option value="R">Rankine</option>
+    </select>
+    <br>
+    <label>Ingresa presión operativa</label>
+    <input type="number" id="pO" placeholder="Presión operativa" min="0" required>
+    <select id="pO-unit" name="pO-unit">
+        <option value="MPa">Mega Pascal</option>
+        <option value="mBar">Mili Bar</option>
+        <option value="Atm" selected>Atmósfera</option>
+        <option value="mmHg">Milímetro de mercurio</option>
+    </select>
+    <br>
+    <label>Ingresa temperatura operativa</label>
+    <input type="number" id="tO" placeholder="Temperatura operativa" required>
+    <select id="tO-unit" name="tO-unit">
+        <option value="K">Kelvin</option>
+        <option value="C" selected>Grado Celsius</option>
+        <option value="F">Grado Fahrenheit</option>
+        <option value="R">Rankine</option>
+    </select>
+    <input type="button" value="Calcular" class="button" id="calcular" onclick="convertAndCalculate()" disabled>
+</form>
+
+<div id="equation">
+    <p>\[\frac{P_{op}}{P_c} = P_r\]</p>
+    <p>\[\frac{T_{op}}{T_c} = T_r\]</p>
+</div>
+
+<div id="result"></div>
+
+<div id="process" class="proximamente"></div>
+
+<div id="share">
+    <ul>
+        <li><a href="https://api.whatsapp.com/send?text=Probá las calculadoras de los gases de https://jimena12345677.github.io/Calculadoras-gases/"><img src="whatsapp_logo.webp" width="100px" height="100px"></a></li>
+    </ul>
+</div>
+
+<script>
+const gasesCriticos = [
+{ nombre: 'Hidrógeno', fr: 'H₂', pC: 12.81, tC: -240.0 },
+{ nombre: 'Nitrógeno', fr: 'N₂', pC: 33.5, tC: -146.9 },
+{ nombre: 'Oxígeno', fr: 'O₂', pC: 50.43, tC: -118.6 },
+{ nombre: 'Flúor', fr: 'F₂', pC: 5.85, tC: -128.8 },
+{ nombre: 'Cloro', fr: 'Cl₂', pC: 77.0, tC: -34.0 },
+{ nombre: 'Helio', fr: 'He', pC: 2.26, tC: -267.9 },
+{ nombre: 'Neón', fr: 'Ne', pC: 26.9, tC: -228.7 },
+{ nombre: 'Argón', fr: 'Ar', pC: 48.0, tC: -122.3 },
+{ nombre: 'Kriptón', fr: 'Kr', pC: 55.0, tC: -63.8 },
+{ nombre: 'Xenón', fr: 'Xe', pC: 57.6, tC: 16.6 },
+{ nombre: 'Óxido nitroso', fr: 'N₂O', pC: 71.6, tC: 36.5 },
+{ nombre: 'Óxido nítrico', fr: 'NO', pC: 64.8, tC: 36.0 },
+{ nombre: 'Trióxido de dinitrógeno', fr: 'N₂O₃', pC: 90.4, tC: 45.6 },
+{ nombre: 'Dióxido de nitrógeno', fr: 'NO₂', pC: 101.3, tC: 36.1 },
+{ nombre: 'Pentóxido de dinitrógeno', fr: 'N₂O₅', pC: 151.0, tC: 41.0 },
+{ nombre: 'Trióxido de nitrógeno', fr: 'NO₃', pC: 50.0, tC: 20.0 },
+{ nombre: 'Cloruro de nitrógeno', fr: 'NCl₃', pC: 82.0, tC: 41.0 },
+{ nombre: 'Sulfuro de hidrógeno', fr: 'H₂S', pC: 88.6, tC: 100.0 },
+{ nombre: 'Selenio de hidrógeno', fr: 'H₂Se', pC: 96.0, tC: 41.0 },
+{ nombre: 'Telurio de hidrógeno', fr: 'H₂Te', pC: 120.0, tC: 50.0 },
+{ nombre: 'Dióxido de azufre', fr: 'SO₂', pC: 78.0, tC: 157.0 },
+{ nombre: 'Trióxido de azufre', fr: 'SO₃', pC: 90.0, tC: 42.0 },
+{ nombre: 'Ácido sulfhídrico', fr: 'H₂SO₄', pC: 89.0, tC: 40.0 },
+{ nombre: 'Metano', fr: 'CH₄', pC: 45.8, tC: -82.6 },
+{ nombre: 'Etano', fr: 'C₂H₆', pC: 48.2, tC: 32.2 },
+{ nombre: 'Propano', fr: 'C₃H₈', pC: 42.5, tC: 96.7 },
+{ nombre: 'Butano', fr: 'C₄H₁₀', pC: 38.0, tC: 151.0 },
+{ nombre: 'Pentano', fr: 'C₅H₁₂', pC: 33.7, tC: 196.0 },
+{ nombre: 'Hexano', fr: 'C₆H₁₄', pC: 30.3, tC: 234.0 },
+{ nombre: 'Heptano', fr: 'C₇H₁₆', pC: 27.4, tC: 266.0 },
+{ nombre: 'Octano', fr: 'C₈H₁₈', pC: 24.9, tC: 295.0 },
+{ nombre: 'Nonano', fr: 'C₉H₂₀', pC: 22.7, tC: 320.0 },
+{ nombre: 'Decano', fr: 'C₁₀H₂₂', pC: 21.0, tC: 342.0 }
+
+];
+
+const selectGases = document.getElementById('gases');
+const calcularBtn = document.getElementById('calcular');
+const pCInput = document.getElementById('pC');
+const pCUnit = document.getElementById('pC-unit');
+const tCInput = document.getElementById('tC');
+const tCUnit = document.getElementById('tC-unit');
+const pOInput = document.getElementById('pO');
+const pOUnit = document.getElementById('pO-unit');
+const tOInput = document.getElementById('tO');
+const tOUnit = document.getElementById('tO-unit');
+const resultDiv = document.getElementById('result');
+
+gasesCriticos.forEach(gas => {
+    const option = document.createElement('option');
+    option.value = gas.nombre + " (" + gas.fr + ")";
+    option.textContent = gas.nombre + " (" + gas.fr + ")";
+    selectGases.appendChild(option);
+});
+
+selectGases.addEventListener('change', function () {
+    const selectedGas = selectGases.value;
+    if (selectedGas === 'Custom') {
+        pCInput.value = '';
+        tCInput.value = '';
+        pCInput.disabled = false;
+        tCInput.disabled = false;
+    } else {
+        const gas = gasesCriticos.find(g => g.nombre + " (" + g.fr + ")" === selectedGas);
+        if (gas) {
+            pCInput.value = gas.pC;
+            tCInput.value = gas.tC;
+            pCInput.disabled = true;
+            tCInput.disabled = true;
+        }
+    }
+    checkFormCompletion();
+});
+
+function checkFormCompletion() {
+    const isFormComplete = pCInput.value && tCInput.value && pOInput.value && tOInput.value;
+    calcularBtn.disabled = !isFormComplete;
+}
+
+pCInput.addEventListener('input', checkFormCompletion);
+tCInput.addEventListener('input', checkFormCompletion);
+tOInput.addEventListener('input', checkFormCompletion);
+pOInput.addEventListener('input', checkFormCompletion);
+
+function convertUnits(value, fromUnit, toUnit) {
+    const conversions = {
+        'MPa': 1e6,
+        'Bar': 1e5,
+        'Atm': 1.01325e5,
+        'mmHg': 133.322,
+        'K': 1,
+        'C': value => value + 273.15,
+        'F': value => (value - 32) * 5/9 + 273.15,
+        'R': value => value * 1.8,
+    };
+
+    if (typeof conversions[fromUnit] === 'number') {
+        value *= conversions[fromUnit];
+    } else if (typeof conversions[fromUnit] === 'function') {
+        value = conversions[fromUnit](value);
+    }
+
+    if (typeof conversions[toUnit] === 'number') {
+        value /= conversions[toUnit];
+    } else if (typeof conversions[toUnit] === 'function') {
+        value = conversions[toUnit](value);
+    }
+
+    return value;
+}
+
+
+function convertAndCalculate() {
+    let pCValue = parseFloat(pCInput.value);
+    let pOValue = parseFloat(pOInput.value);
+    let tCValue = parseFloat(tCInput.value);
+    let tOValue = parseFloat(tOInput.value);
+
+    if (isNaN(pCValue) || isNaN(pOValue) || isNaN(tCValue) || isNaN(tOValue)) {
+        alert('Por favor, ingrese valores numéricos válidos.');
+        return;
+    }
+
+    if (pOValue < 0 || pCValue < 0) {
+        alert('No se puede ingresar una presión negativa.');
+        return;
+    }
+
+    if ((tOValue < 0 && tOUnit.value === 'K') || (tOValue < 0 && tOUnit.value === 'R')) {
+        alert('Como la unidad de temperatura seleccionada es ' + tOUnit.value + ', el valor no puede ser negativo.');
+        return;
+    }
+
+    pCValue = convertUnits(pCValue, pCUnit.value, 'Atm');
+    console.log(pCValue + " es PC en Atm");
+    pOValue = convertUnits(pOValue, pOUnit.value, 'Atm');
+    console.log(pOValue + " es PO en Atm");
+    tCValue = convertUnits(tCValue, tCUnit.value, 'K');
+    console.log(tCValue + " es TC en K");
+    tOValue = convertUnits(tOValue, tOUnit.value, 'K');
+    console.log(tOValue + " es TO en K");
+
+    const pR = pOValue / pCValue;
+    const tR = tOValue / tCValue;
+
+    resultDiv.innerHTML = `<p>Presión Reducida: ${pR.toFixed(2)}</p><p>Temperatura Reducida: ${tR.toFixed(2)}</p>`;
+    resultDiv.style.display = 'block';
+}
+</script>
+</body>
+</html>
